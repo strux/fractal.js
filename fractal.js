@@ -44,7 +44,7 @@ FractalNoise.prototype.fractalNoise = function (w, h, octave) {
   var fractal = [];
 
   for (var i = 0; i < octave; i++) {
-    smooth[i] = this.smoothNoise(w, h);
+    smooth[i] = this.smoothNoise(w, h, i);
   }
 
   for (var o = (octave - 1); o >= 0; o--) {
