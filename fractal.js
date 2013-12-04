@@ -1,4 +1,7 @@
 var FractalNoise = function () {};
+FractalNoise.prototype.interpolate = function(x0, x1, alpha) {
+  return x0 * (1 - alpha) + alpha * x1;
+}
 FractalNoise.prototype.whiteNoise = function (w, h) {
   var noise = [];
   for (var i = 0; i < w; i++) {
@@ -27,10 +30,10 @@ FractalNoise.prototype.smoothNoise = function (w, h, octave) {
       var _j1 = (_j0 + samplePeriod) % h;
       var v_blend = (j - _j0) * sampleFreq;
 
-      var top = whiteNoise[_i0][_j0] * (1 - h_blend) + h_blend * whiteNoise[_i1][_j0];
-      var bottom = whiteNoise[_i0][_j1] * (1 - h_blend) + h_blend * whiteNoise[_i1][_j1];
+      var top = this.interpolate(whiteNoise[_i0][_j0], whiteNoise[_i1][_j0], h_blend);
+      var bottom = this.interpolate(whiteNoise[_i0][_j1], whiteNoise[_i1][_j1], h_blend);
 
-      smooth[i][j] = Math.floor((top * (1 - v_blend) + v_blend * bottom) * 255);
+      smooth[i][j] = Math.floor(this.interpolate(top, bottom,  v_blend) * 255);
     }
   }
   return smooth;
