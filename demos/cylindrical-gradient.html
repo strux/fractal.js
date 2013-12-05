@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      background-color: rgb(128,128,128)
+    }
+    canvas {
+      padding: 20px;
+      position:absolute;
+      top:0;
+      left:0
+    }
+  </style>
+</head>
+<body>
+  <canvas id="terrain"></canvas>
+  <br/>
+
+  <script src="../fractal.js"></script>
+  <script>
+    var canvas = document.getElementById("terrain"),
+        terrain_ctx = canvas.getContext('2d'),
+        w = 300,
+        h = 300,
+        gradient_start = 0,
+        gradient_stop = (h / 2),
+        pixel_size = 1,
+        noise = new FractalNoise(),
+        fractal = noise.fractalNoise(w, h),
+        bg_color = "rgba(255,255,255,1)",
+        fg_color = "rgba(40,80,10,1)";
+    canvas.width = w;
+    canvas.height = h;
+
+
+    for (var i = 0;i < w;i+=pixel_size){
+      for (var j = 0; j < h; j+=pixel_size){
+        terrain_ctx.fillStyle = bg_color;
+        terrain_ctx.fillRect(i,j,pixel_size,pixel_size);
+      }
+    }
+
+    for (var i = 0;i < w;i+=pixel_size){
+      for (var j = 0; j < h; j+=pixel_size){
+        var r = gradient_stop - gradient_start,
+            y = r - j,
+            x;
+            x = Math.sqrt(Math.pow(r, 2) - Math.pow(y, 2));
+            alpha = x/r;// * .5;
+            alpha = noise.interpolate(alpha, 1, fractal[i][j]/255);
+        if(i==0) console.log('alpha: ' + alpha);
+        color = fg_color.replace('1)', alpha + ')')
+        terrain_ctx.fillStyle = color;
+        terrain_ctx.fillRect(i,j,pixel_size,pixel_size);
+      }
+    }
+
+
+  </script>
+</body>
+</html>
