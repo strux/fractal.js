@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    canvas {
+      position:absolute;
+      top:0;
+      left:0
+    }
+  </style>
+</head>
+<body>
+  <canvas id="terrain"></canvas>
+  <br/>
+
+  <script src="../fractal.js"></script>
+  <script>
+    var canvas = document.getElementById("terrain"),
+        terrain_ctx = canvas.getContext('2d'),
+        w = window.innerWidth,
+        h = window.innerHeight,
+        r = h / 2,
+        pixel_size = 1,
+        noise = new FractalNoise(),
+        elevation_fractal = noise.fractalNoise(w, h),
+        temp_fractal = noise.fractalNoise(w, h),
+        sea_level = 135;
+    (h < 400) ? h = 400 : h;
+    canvas.width = w;
+    canvas.height = h;
+
+
+    for (var i = 0;i < w;i+=pixel_size){
+      for (var j = 0; j < h; j+=pixel_size){
+
+        var y = r - j,
+            x = Math.sqrt(Math.pow(r, 2) - Math.pow(y, 2));
+        base_temp = x/r;
+        if(i==0) console.log(base_temp);
+        temp = base_temp;
+        temp = noise.interpolate(base_temp, 1, temp_fractal[i][j]/255);
+
+        if(elevation_fractal[i][j] > sea_level) {
+          //mountain peaks / snow
+          if(elevation_fractal[i][j] > 210) {
+            terrain_ctx.fillStyle = "rgb(255,255,255)";
+          }
+          //mountains
+          else if (elevation_fractal[i][j] > 190) {
+            terrain_ctx.fillStyle = "rgb(120,120,120)";
+          }
+          //land
+          else if (elevation_fractal[i][j] > 140) {
+            if(temp > 0.95) {
+              // hot tropical
+              terrain_ctx.fillStyle = "rgb(40,80,10)";
+            }
+            else {
+              // temperate deciduous
+              terrain_ctx.fillStyle = "rgb(40,99,10)";
+            }
+          }
+          //beach
+          else if (elevation_fractal[i][j] > sea_level) {
+            terrain_ctx.fillStyle = "rgb(250,220,190)";
+          }
+          // snow where freezing
+          if(temp < 0.75) {
+            terrain_ctx.fillStyle = "rgb(255,255,255)";
+          }
+        }
+        //ocean
+        else {
+          if (elevation_fractal[i][j] > sea_level - 10) {
+            terrain_ctx.fillStyle = "rgb(87,112,205)";
+          }
+          else {
+            terrain_ctx.fillStyle = "rgb(50,70,180)";
+          }
+        }
+
+        terrain_ctx.fillRect(i,j,pixel_size,pixel_size);
+      }
+    }
+
+  </script>
+</body>
+</html>

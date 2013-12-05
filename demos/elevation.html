@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    canvas {
+      position:absolute;
+      top:0;
+      left:0
+    }
+  </style>
+</head>
+<body>
+  <canvas id="terrain"></canvas>
+  <br/>
+
+  <script src="../fractal.js"></script>
+  <script>
+    var canvas = document.getElementById("terrain"),
+        terrain_ctx = canvas.getContext('2d'),
+        w = window.innerWidth,
+        h = window.innerHeight,
+        pixel_size = 1,
+        noise = new FractalNoise(),
+        perlin_noise = noise.fractalNoise(w, h);
+    (h < 400) ? h = 400 : h;
+    canvas.width = w;
+    canvas.height = h;
+
+
+    for (var i = 0;i < w;i+=pixel_size){
+      for (var j = 0; j < h; j+=pixel_size){
+
+        //mountain peaks / snow
+        if(perlin_noise[i][j] > 210) {
+          terrain_ctx.fillStyle = "rgb(255,255,255)";
+        }
+        //mountains
+        else if (perlin_noise[i][j] > 190) {
+          terrain_ctx.fillStyle = "rgb(120,120,120)";
+        }
+        //land
+        else if (perlin_noise[i][j] > 140) {
+          terrain_ctx.fillStyle = "rgb(40,80,10)";
+        }
+        //beach
+        else if (perlin_noise[i][j] > 135) {
+          terrain_ctx.fillStyle = "rgb(250,220,190)";
+        }
+        //ocean
+        else {
+          terrain_ctx.fillStyle = "rgb(50,70,180)";
+        }
+
+        terrain_ctx.fillRect(i,j,pixel_size,pixel_size);
+      }
+    }
+
+  </script>
+</body>
+</html>
