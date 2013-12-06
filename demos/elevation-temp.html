@@ -21,10 +21,33 @@
         h = window.innerHeight,
         r = h / 2,
         pixel_size = 1,
+        color = "rgb(255,0,0)",
         noise = new FractalNoise(),
         elevation_fractal = noise.fractalNoise(w, h),
         temp_fractal = noise.fractalNoise(w, h),
-        sea_level = 135;
+        precip_fractal = noise.fractalNoise(w, h),
+        deep_sea = { color: "rgb(87,112,205)" , level: 125},
+        sea      = { color: "rgb(50,70,180)"  , level: 135},
+        beach    = { color: "rgb(250,220,190)", level: 135},
+        land     = { level: 140},
+        mountain = { color: "rgb(120,120,120)", level: 190},
+        alpine   = { color: "rgb(255,255,255)", level: 210},
+        biomes = {
+          biomes: [
+            { name: "tropical",  temp: 0.95, precip: 127, color: "rgb(40,99,10)"},
+            { name: "deciduous", temp: 0.00, precip: 0,   color: "rgb(40,80,10)"},
+          ],
+
+          find: function(temp, precip) {
+            for(i=0; i<this.biomes.length; i++) {
+              biome = this.biomes[i]
+              if (temp > biome.temp && precip > biome.precip) {
+                return biome.color;
+              }
+            }
+          }
+        };
+
     (h < 400) ? h = 400 : h;
     canvas.width = w;
     canvas.height = h;
@@ -33,52 +56,47 @@
     for (var i = 0;i < w;i+=pixel_size){
       for (var j = 0; j < h; j+=pixel_size){
 
+        // cylindrical gradient to emulate temps
+        // from curvature of the earth
         var y = r - j,
             x = Math.sqrt(Math.pow(r, 2) - Math.pow(y, 2));
         base_temp = x/r;
-        if(i==0) console.log(base_temp);
         temp = base_temp;
         temp = noise.interpolate(base_temp, 1, temp_fractal[i][j]/255);
 
-        if(elevation_fractal[i][j] > sea_level) {
+        precip = precip_fractal[i][j];
+
+        if(elevation_fractal[i][j] > sea.level) {
           //mountain peaks / snow
-          if(elevation_fractal[i][j] > 210) {
-            terrain_ctx.fillStyle = "rgb(255,255,255)";
+          if(elevation_fractal[i][j] > alpine.level) {
+            color = alpine.color;
           }
           //mountains
-          else if (elevation_fractal[i][j] > 190) {
-            terrain_ctx.fillStyle = "rgb(120,120,120)";
+          else if (elevation_fractal[i][j] > mountain.level) {
+            color = "rgb(255,0,0)"; //mountain.color;
           }
           //land
-          else if (elevation_fractal[i][j] > 140) {
-            if(temp > 0.95) {
-              // hot tropical
-              terrain_ctx.fillStyle = "rgb(40,80,10)";
-            }
-            else {
-              // temperate deciduous
-              terrain_ctx.fillStyle = "rgb(40,99,10)";
-            }
+          else if (elevation_fractal[i][j] > land.level) {
+            color = biomes.find(temp, precip).color;
           }
           //beach
-          else if (elevation_fractal[i][j] > sea_level) {
-            terrain_ctx.fillStyle = "rgb(250,220,190)";
+          else if (elevation_fractal[i][j] > sea.level) {
+            color = beach.color;
           }
           // snow where freezing
-          if(temp < 0.75) {
-            terrain_ctx.fillStyle = "rgb(255,255,255)";
-          }
+          //if(temp < 0.75) {
+          //  color = alpine.color;
+          //}
         }
         //ocean
+        else if (elevation_fractal[i][j] > deep_sea.level) {
+          color = deep_sea.color;
+        }
         else {
-          if (elevation_fractal[i][j] > sea_level - 10) {
-            terrain_ctx.fillStyle = "rgb(87,112,205)";
-          }
-          else {
-            terrain_ctx.fillStyle = "rgb(50,70,180)";
-          }
+          color = sea.color;
         }
 
+        terrain_ctx.fillStyle = color;
         terrain_ctx.fillRect(i,j,pixel_size,pixel_size);
       }
     }
