@@ -29,26 +29,29 @@
         deep_sea = { color: "rgb(87,112,205)" , level: 125},
         sea      = { color: "rgb(50,70,180)"  , level: 135},
         beach    = { color: "rgb(250,220,190)", level: 135},
-        land     = { level: 140},
+        land     = { color: "rgb(255,0,0)"    , level: 140},
         mountain = { color: "rgb(120,120,120)", level: 190},
         alpine   = { color: "rgb(255,255,255)", level: 210},
         biomes = {
           biomes: [
-            { name: "tropical",  temp: 0.95, precip: 127, color: "rgb(40,99,10)"},
-            { name: "deciduous", temp: 0.00, precip: 0,   color: "rgb(40,80,10)"},
+            { name: "tropical",  temp: 0.95, precip: 100, color: "rgb(40,80,10)"},
+            { name: "desert",    temp: 0.95, precip: 0,   color: "rgb(250,220,190)"},
+            { name: "deciduous", temp: 0.75, precip: 100, color: "rgb(40,99,10)"},
+            { name: "grassland", temp: 0.75, precip: 0,   color: "rgb(167,181,140)"},
+            { name: "tiaga",     temp: 0.00, precip: 100, color: "rgb(255,255,255)"},
+            { name: "tundra",    temp: 0.00, precip: 0,   color: "rgb(200,200,250)"},
           ],
 
           find: function(temp, precip) {
-            for(i=0; i<this.biomes.length; i++) {
+            for(var i=0; i<this.biomes.length; i++) {
               biome = this.biomes[i]
-              if (temp > biome.temp && precip > biome.precip) {
-                return biome.color;
+              if (temp > biome.temp  && precip > biome.precip) {
+                return biome
               }
             }
           }
         };
 
-    (h < 400) ? h = 400 : h;
     canvas.width = w;
     canvas.height = h;
 
@@ -73,20 +76,17 @@
           }
           //mountains
           else if (elevation_fractal[i][j] > mountain.level) {
-            color = "rgb(255,0,0)"; //mountain.color;
+            color = mountain.color;
           }
           //land
           else if (elevation_fractal[i][j] > land.level) {
+            color = land.color;
             color = biomes.find(temp, precip).color;
           }
           //beach
           else if (elevation_fractal[i][j] > sea.level) {
             color = beach.color;
           }
-          // snow where freezing
-          //if(temp < 0.75) {
-          //  color = alpine.color;
-          //}
         }
         //ocean
         else if (elevation_fractal[i][j] > deep_sea.level) {
